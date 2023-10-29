@@ -12,15 +12,14 @@ class DBSettings(BaseSettings):
 
     @property
     def connection_string(self) -> str:
-        """Generates DB connection string.
-        Returns:
-            str: DB connnection string.
-        """
         connector = f"{self.RDBMS}+{self.DRIVER}://"
         credentials = f"{self.USER}:{self.PASS}@{self.HOST}:{self.PORT}/{self.NAME}"
         return connector + credentials
     
-    model_config = SettingsConfigDict(env_prefix="DB_", env_file=".env")
+    model_config = SettingsConfigDict(
+        env_prefix="DB_",
+        env_file=".env"
+    )
 
 
 db_settings = DBSettings()

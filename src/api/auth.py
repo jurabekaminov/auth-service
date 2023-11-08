@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from src.models.users import User
 from src.schemas.token import TokenPayloadSchema, TokenSchema
-from src.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
+from src.schemas.user import UserCreateSchema, UserResponseSchema
 from src.service import AuthService
 from src.token.token import Token
 
@@ -33,19 +32,6 @@ async def login(
     return token
 
 
-@router.put("/users/me", status_code=status.HTTP_204_NO_CONTENT)
-async def update_user(
-    schema: UserUpdateSchema,
-    user_info: TokenPayloadSchema = Depends(Token.verify_token),
-    service: AuthService = Depends(),
-    
-):
-    await service.update_user(int(user_info.sub), schema)
-
-
-@router.delete("/users/me", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(
-    user_info: TokenPayloadSchema = Depends(Token.verify_token),
-    service: AuthService = Depends()
-):
-    await service.delete_user(int(user_info.sub))
+@router.post("/introspect", response_model=TokenPayloadSchema)
+async def introspect_token(user_info: TokenPayloadSchema = Depends(Token.verify_token)):
+    return user_info

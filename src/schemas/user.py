@@ -16,3 +16,4 @@ class UserResponseSchema(BaseModel):
     id: int
     email: str = Field(max_length=128)
     role: RoleEnum
+    created_by: int | None = None

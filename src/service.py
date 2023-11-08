@@ -36,14 +36,19 @@ class AuthService:
             )
         return user
     
-    async def create_user(self, schema: UserCreateSchema) -> User:
+    async def create_user(
+        self,
+        schema: UserCreateSchema,
+        creator_id: int = None
+    ) -> User:
         try:
             user_duplicate = await self.read_user(email=schema.email)
         except HTTPException:
             user = User(
                 email=schema.email,
                 password_hashed=Token.get_password_hash(schema.text_password),
-                role=schema.role.value
+                role=schema.role.value,
+                created_by=creator_id
             )
             self.session.add(user)
             await self.session.commit()
@@ -68,10 +73,11 @@ class AuthService:
         now = datetime.now()
         payload = TokenPayloadSchema(
             iat=now,
-            exp=now + timedelta(jwt_settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+            exp=now + timedelta(minutes=jwt_settings.ACCESS_TOKEN_EXPIRE_MINUTES),
             sub=str(user.id),
             role=user.role,
-            email=user.email
+            email=user.email,
+            org=user.created_by if user.created_by else user.id
         )
         return Token.create_token(payload)
 
@@ -87,3 +93,10 @@ class AuthService:
             .where(User.id == id)
         )
         await self.session.commit()
+
+    async def read_created_users(self, id: int) -> list[User]:
+        users = await self.session.execute(
+            select(User)
+            .where(User.created_by == id)
+        )
+        return users.scalars()

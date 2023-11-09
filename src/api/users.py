@@ -49,10 +49,19 @@ async def delete_user(
     await service.delete_user(int(user_info.sub))
 
 
-@router.get("/me/workers", response_model=list[UserResponseSchema])
+@router.get("/workers", response_model=list[UserResponseSchema])
 async def get_created_users(
     organization_info: TokenPayloadSchema = Depends(Token.verify_organization),
     service: AuthService = Depends()
 ):
     users = await service.read_created_users(int(organization_info.sub))
     return users
+
+
+@router.delete("/workers/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_worker(
+    id: int,
+    organization_info: TokenPayloadSchema = Depends(Token.verify_organization),
+    service: AuthService = Depends()
+):
+    await service.delete_worker(int(organization_info.sub), id)

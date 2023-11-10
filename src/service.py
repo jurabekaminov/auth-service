@@ -11,6 +11,7 @@ from src.schemas.token import TokenPayloadSchema, TokenSchema
 from src.schemas.user import UserCreateSchema, UserUpdateSchema
 from src.token.config import jwt_settings
 from src.token.token import Token
+from src.utils.roles import RoleEnum
 
 
 class AuthService:
@@ -100,3 +101,12 @@ class AuthService:
             .where(User.created_by == id)
         )
         return users.scalars()
+
+    async def delete_worker(self, organization_id: int, worker_id: int) -> None:
+        worker = await self.read_user(id=worker_id)
+        if worker.created_by != organization_id or worker.role != RoleEnum.WORKER.value:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"User with id: {worker_id} is not your worker"
+            )
+        await self.delete_user(worker_id)

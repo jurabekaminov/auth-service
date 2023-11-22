@@ -10,7 +10,11 @@
 
 ## Сборка и запуск проекта:
     git clone https://github.com/AgroScience-Team/auth-service.git
-    
+
+Если не создана docker-сеть `agronetwork`, то:
+
+    docker create network agronetwork
+
 Из корневой папки проекта:
 
     docker-compose up -d 
